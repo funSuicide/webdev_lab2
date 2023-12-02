@@ -1,0 +1,29 @@
+.top-bar {
+    background-color: #0d47a1;
+    width: 100%;
+    height: 50px;
+}
+
+.side-bar{
+    background-color: #2196f3;
+    width: 100%;
+    height: 120px;
+}
+
+.schedule-table{
+    table-layout: fixed;
+    width: 100%;
+    border-collapse: collapse;
+    border: 1px solid #a6d5fa;
+}
+
+.schedule{
+    margin-top: 100px;
+    height: auto;
+}
+
+.week-selectors-container{
+    height: 20px;
+}
+
+
