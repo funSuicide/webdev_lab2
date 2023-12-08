@@ -1,0 +1,278 @@
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Расписание</title>
+    <style>
+        .top-bar {
+        background-color: #0d47a1;
+        width: 100%;
+        height: 50px;
+    }
+
+        .side-bar{
+        background-color: #2196f3;
+        width: 100%;
+        height: 120px;
+    }
+
+        .schedule-table{
+        table-layout: fixed;
+        width: 100%;
+        border-collapse: collapse;
+        border: 1px solid #a6d5fa;
+    }
+
+        .schedule{
+        margin-top: 50px;
+        height: auto;
+    }
+
+        .data_list {
+        position: absolute;
+        background-color: white;
+        border: 1px solid blue;
+        border-radius: 0 0 5px 5px;
+        border-top: none;
+        font-family: sans-serif;
+        width: 350px;
+        padding: 5px;
+        max-height: 10rem;
+        overflow-y: auto
+    }
+
+        fieldset {
+        border: 1px solid blue;
+        width: 360px;
+        border-radius: 5px;
+        margin-bottom: 20px;
+    }
+        legend, label{
+        color: blue;
+        font-size: 24px;
+        font-family: sans-serif;
+    }
+
+        option {
+        background-color: white;
+        padding: 4px;
+        color: blue;
+        margin-bottom: 1px;
+        font-size: 18px;
+        cursor: pointer;
+    }
+
+        option:hover,  .active{
+        background-color: lightblue;
+    }
+        .data-query {
+        font-size: 18px;
+        padding: 5px;
+        height: 35px;
+        width: 200px;
+        border: 1px solid blue;
+        outline: none;
+        border-radius: 5px;
+        color: blue;
+    }
+        .week-selectors-container{
+        border: 1px solid blue;
+        width: auto;
+        border-radius: 5px;
+        margin-bottom: 10px;
+        padding-left: 5px;
+        padding-right: 5px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+        .button-week{
+        border: 2px solid blue;
+        border-radius: 5px;
+        color: blue;
+        background-color: white;
+        padding: 10px 20px;
+        text-align: center;
+        text-decoration: none;
+        font-size: 14px;
+    }
+
+        .button:hover {
+        background-color: blue;
+        color: white;
+    }
+
+        table {
+        border-collapse: collapse;
+        width: 100%;
+        margin-bottom: 20px;
+
+    }
+
+        th, td {
+        border: 1px solid #00f;
+        padding: 10px;
+        text-align: left;
+        word-break: break-all;
+    }
+
+        th {
+        background-color: #f2f2f2;
+        font-weight: bold;
+    }
+
+        .search-button{
+        border: 2px solid blue;
+        border-radius: 5px;
+        color: blue;
+        background-color: white;
+        padding: 10px 20px;
+        text-align: center;
+        text-decoration: none;
+        font-size: 16px;
+        height: 40px;
+        margin-top: 15px;
+    }
+
+        .view_week{
+        font-size: 14px;
+        color: blue;
+    }
+
+        @media screen and (max-width: 684px) {
+        table {
+        font-size: 12.8;
+        }
+
+        .button-week{
+        font-size: 8px;
+        }
+
+        .week-selectors-container {
+        flex-direction: column;
+        }
+
+        .button-week {
+            width: 50%;
+        }
+    }
+
+    </style>
+</head>
+<body>
+<header>
+    <div class="top-bar"></div>
+    <div class="side-bar"></div>
+</header>
+<div class="schedule">
+    <form method="post">
+        {% csrf_token %}
+        <fieldset>
+            <legend>
+                Поиск расписания
+            </legend>
+            <label>Выберите данные для поиска</label>
+            <input list="data_list" type="text" name="data_query" id="data_query" value="{{ current_data }}"
+                   class = "data-query" autocomplete="off">
+            <datalist id="data_list">
+                {% for data in all_data %}
+                <option value="{{ data }}"> {% endfor %}
+            </datalist>
+            <input type="submit" value="Поиск" class="search-button">
+        </fieldset>
+
+        <div id="change-week-form" class="week-selectors-container">
+            <button type="submit" onclick="prevWeek()" class="button-week">предыдущая неделя <</button>
+            <input type="hidden" name="week_shift" id="week-shift" value="0">
+            <h3 class="view_week">{{result_week}} неделя</h3>
+            <button type="submit" onclick="nextWeek()" class="button-week">следующая неделя ></button>
+        </div>
+    </form>
+
+    <table class="schedule-table">
+        <tr>
+            <th>Время</th>
+            <th>понедельник</th>
+            <th>вторник</th>
+            <th>среда</th>
+            <th>четверг</th>
+            <th>пятница</th>
+            <th>суббота</th>
+        </tr>
+
+        {% for time_slot in time_slots %}
+        <tr>
+            <td>{{ time_slot }}</td>
+            {% for day, entries in schedule.items %}
+            {% for entry in entries %}
+            {% if entry.time == time_slot %}
+            <td>
+                {{ entry.subject }}<br>
+                {{ entry.place }}<br>
+                {{ entry.person }}<br>
+                {{ entry.groups|join:", " }}
+            </td>
+            {% endif %}
+            {% endfor %}
+            {% endfor %}
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+</body>
+</html>
+
+<script>
+    function nextWeek(){
+        var queryWeekShift = document.getElementById('week-shift');
+        var queryWeekShiftInt = parseInt(queryWeekShift.value)
+        if (current_week + queryWeekShiftInt + 1  < 26) {
+            queryWeekShift.value = queryWeekShiftInt + 1;
+            localStorage.setItem('week-shift', queryWeekShift.value);
+            document.getElementById('change-week-form').submit();
+        }
+    }
+
+    function prevWeek(){
+        var queryWeekShift = document.getElementById('week-shift');
+        var queryWeekShiftInt = parseInt(queryWeekShift.value)
+        if (current_week + queryWeekShiftInt -1 >= 0) {
+            queryWeekShift.value = queryWeekShiftInt - 1;
+            localStorage.setItem('week-shift', queryWeekShift.value);
+            document.getElementById('change-week-form').submit();
+        }
+    }
+
+    var localShift = localStorage.getItem('week-shift');
+
+    if (localShift !== null) {
+        document.getElementById('week-shift').value = localShift;
+    }
+
+    var current_week = {{ current_week }};
+    var queryWeekShift = document.getElementById('week-shift');
+
+    document.addEventListener("DOMContentLoaded", function() {
+        var dataQueryLocal = localStorage.getItem('data_query');
+        if (storedDataSelect !== null) {
+            document.getElementById('data_query').value = dataQueryLocal;
+        }
+    });
+
+    document.getElementById('data_query').addEventListener('input', function() {
+        var valueDataQuery = this.value;
+        localStorage.setItem('data_query', valueDataQuery);
+    });
+
+    document.getElementById('change_week_form').addEventListener('submit', function() {
+        var dataQueryLocal = localStorage.getItem('data_query');
+        if (dataQueryLocal  !== null) {
+            var hiddenInput = document.createElement('input');
+            hiddenInput.type = 'hidden';
+            hiddenInput.name = 'data_query';
+            hiddenInput.value = dataQueryLocal;
+            this.appendChild(hiddenInput);
+        }
+    });
+
+</script>
