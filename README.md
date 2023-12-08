@@ -12,8 +12,11 @@
 
 ### Пример 1. 
 
+![image](https://github.com/funSuicide/webdev_lab2/blob/main/examples/1.png)
 
-### Пример 2. 
+### Пример 2. (witdh <= 684)
+
+![image](https://github.com/funSuicide/webdev_lab2/blob/main/examples/2.png)
 
 
 ## Инструкция по использованию. 
